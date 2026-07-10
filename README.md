@@ -301,6 +301,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 PORT=3000
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
 ```
 
 > All of these variables are required — the app will refuse to start if any are missing (this is intentional, to avoid accidentally running with insecure defaults).
