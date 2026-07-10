@@ -1,4 +1,4 @@
-﻿# Authentication API 🔐
+# Authentication API 🔐
 
 A secure, production-style backend service that handles **user signup, login, and login sessions** — the kind of system every app (Instagram, Amazon, Gmail...) needs behind the scenes to know *who you are* and keep your account safe.
 
@@ -6,7 +6,7 @@ A secure, production-style backend service that handles **user signup, login, an
 
 ---
 
-## What does this actually do? (in plain English)
+## What does this actually do?
 
 Imagine every website as a building with a receptionist at the front desk. Before you can go inside and use anything, the receptionist needs to:
 
@@ -39,14 +39,10 @@ Almost every app needs authentication, and doing it *wrong* is one of the most c
 
 ```mermaid
 graph TD
-    Client["Client (App/Browser)"] -->|"POST /api/auth/register or /login"| Validator["Validator (checks input is valid)"]
-    Validator --> Controller["Controller (auth.controller.js)"]
-    Controller -->|"hash & compare passwords"| Model["User Model (MongoDB via Mongoose)"]
-    Controller -->|"issues"| Tokens["Access Token + Refresh Token (JWT)"]
-    Tokens -->|"stored in secure cookie"| Client
-
-    Client -->|"GET /api/auth/me (with cookie)"| Middleware["Auth Middleware (checks token is valid)"]
-    Middleware --> Controller2["Controller returns user data"]
+    A["User fills Signup/Login form"] --> B["Server checks the details"]
+    B --> C["Password is verified securely"]
+    C --> D["Server hands back a Token (like an entry pass)"]
+    D --> E["User uses that Token to access protected pages"]
 ```
 
 ---
@@ -79,6 +75,7 @@ Base URL: `/api/auth`
 
 ### Example: Register
 
+**Request**
 ```http
 POST /api/auth/register
 Content-Type: application/json
@@ -92,8 +89,28 @@ Content-Type: application/json
 }
 ```
 
+**Response** `200 OK`
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "eyJhbGciOi...",
+  "user": {
+    "id": "665f1c2a9b1e2a0012345678",
+    "email": "user@example.com",
+    "contact": "9876543210",
+    "fullname": "Jane Doe",
+    "role": "buyer"
+  }
+}
+```
+
+---
+
 ### Example: Login
 
+**Request**
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -104,7 +121,113 @@ Content-Type: application/json
 }
 ```
 
-Both responses return a `user` object plus `accessToken` and `refreshToken` — the access token is also set as a secure, `httpOnly` cookie automatically.
+**Response** `200 OK`
+```json
+{
+  "success": true,
+  "message": "User logged in successfully",
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "eyJhbGciOi...",
+  "user": {
+    "id": "665f1c2a9b1e2a0012345678",
+    "email": "user@example.com",
+    "contact": "9876543210",
+    "fullname": "Jane Doe",
+    "role": "buyer"
+  }
+}
+```
+
+> The access token is also automatically set as a secure, `httpOnly` cookie — you don't have to store it manually if you're calling this from a browser.
+
+---
+
+### Example: Get Current User (`/me`)
+
+**Request**
+```http
+GET /api/auth/me
+Cookie: token=eyJhbGciOi...
+```
+
+**Response** `200 OK`
+```json
+{
+  "success": true,
+  "message": "User fetched successfully",
+  "user": {
+    "id": "665f1c2a9b1e2a0012345678",
+    "email": "user@example.com",
+    "contact": "9876543210",
+    "fullname": "Jane Doe",
+    "role": "buyer"
+  }
+}
+```
+
+**If the token is missing or invalid** → `401 Unauthorized`
+```json
+{
+  "success": false,
+  "message": "Unauthorized"
+}
+```
+
+---
+
+### Example: Refresh Token
+
+Used when the access token expires — instead of logging in again, the app exchanges the refresh token for a fresh access token.
+
+**Request**
+```http
+GET /api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOi..."
+}
+```
+
+**Response** `200 OK`
+```json
+{
+  "success": true,
+  "accessToken": "eyJhbGciOi... (new one)"
+}
+```
+
+**If the refresh token is invalid or expired** → `401 Unauthorized`
+```json
+{
+  "success": false,
+  "message": "Invalid or expired refresh token"
+}
+```
+
+---
+
+### Example: Logout
+
+**Request**
+```http
+POST /api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOi..."
+}
+```
+
+**Response** `200 OK`
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+This clears the refresh token from the database and removes the auth cookie, so the old tokens can no longer be used.
 
 ---
 
@@ -206,7 +329,3 @@ The API will be running at `http://localhost:3000`.
 Building this taught me how login systems actually work behind the "Sign In" button — password hashing, why apps use two tokens instead of one, how OAuth logins work without ever seeing a user's Google password, and how to validate and secure incoming data before it touches a database.
 
 ---
-
-## License
-
-No license file included yet.
