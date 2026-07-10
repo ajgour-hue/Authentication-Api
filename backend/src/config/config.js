@@ -56,4 +56,5 @@ export const config = {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     NODE_ENV: process.env.NODE_ENV || "development",
     CLIENT_URL: process.env.CLIENT_URL,
+    GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL
 }
