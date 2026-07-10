@@ -53,7 +53,7 @@ router.post("/logout", logout);
  * @description Refresh a user
  * @access Private
  */
-router.get("/refresh", refreshToken);
+router.post("/refresh", refreshToken);
 
 /**
  * @route GET /api/auth/google

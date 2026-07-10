@@ -78,41 +78,23 @@ export const register = async (req, res) => {
 export const refreshToken = async (req, res) => {
     try {
         const { refreshToken } = req.body;
+        if (!refreshToken) return res.status(401).json({ success: false, message: "Refresh token is required" });
 
-        if (!refreshToken) {
-            return res.status(401).json({
-                success: false,
-                message: "Refresh token is required",
-            });
-        }
-
-        const decoded = jwt.verify(
-            refreshToken,
-            config.JWT_REFRESH_SECRET
-        );
-
+        const decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
         const user = await userModel.findById(decoded.id);
 
         if (!user || user.refreshToken !== refreshToken) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid refresh token",
-            });
+            return res.status(401).json({ success: false, message: "Invalid refresh token" });
         }
 
-        const accessToken = generateAccessToken(user);
+        const newAccessToken = generateAccessToken(user);
+        const newRefreshToken = generateRefreshToken(user);   //  rotation
+        user.refreshToken = newRefreshToken;                   // 👈 old token invalidated
+        await user.save();
 
-        return res.status(200).json({
-            success: true,
-            accessToken,
-        });
+        return res.status(200).json({ success: true, accessToken: newAccessToken, refreshToken: newRefreshToken });
     } catch (error) {
-        console.log(error);
-
-        return res.status(401).json({
-            success: false,
-            message: "Invalid or expired refresh token",
-        });
+        return res.status(401).json({ success: false, message: "Invalid or expired refresh token" });
     }
 };
 
@@ -161,38 +143,46 @@ export const getMe = async (req, res) => {
 
 // Function to google callback
 export const googleCallback = async (req, res) => {
+    try {
+        const { id, displayName, emails } = req.user;
+        const email = emails[0].value;
 
-    const { id, displayName, emails } = req.user;
-    const email = emails[0].value;
+        let user = await userModel.findOne({ email });
 
-    let user = await userModel.findOne({ email });
+        if (!user) {
+            user = await userModel.create({
+                email,
+                googleId: id,
+                fullname: displayName,
+            });
+        }
 
-    if (!user) {
-        user = await userModel.create({
-            email,
-            googleId: id,
-            fullname: displayName,
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.cookie("token", accessToken, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: "strict",
         });
+
+        res.redirect(
+            config.NODE_ENV === "development"
+                ? "http://localhost:5173"
+                : config.CLIENT_URL
+        );
+    } catch (error) {
+        console.log(error);
+
+        return res.redirect(
+            config.NODE_ENV === "development"
+                ? "http://localhost:5173/login?error=google_auth_failed"
+                : config.CLIENT_URL + "/login?error=google_auth_failed"
+        );
     }
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    res.cookie("token", accessToken, {
-        httpOnly: true,
-        secure: config.NODE_ENV === "production",
-        sameSite: "strict",
-    });
-
-    // res.redirect("http://localhost:5173");
-     res.redirect(
-        config.NODE_ENV === "development"
-            ? "http://localhost:5173"
-            : config.CLIENT_URL
-    );
 };
 
 // Function to logout user
