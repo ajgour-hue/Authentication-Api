@@ -2,7 +2,7 @@
 
 A secure, production-style backend service that handles **user signup, login, and login sessions** — the kind of system every app (Instagram, Amazon, Gmail...) needs behind the scenes to know *who you are* and keep your account safe.
 
-> 🎓 This is my **first internship project** — built to understand how real-world authentication systems work under the hood.
+>  This is my **first internship project** — built to understand how real-world authentication systems work under the hood.
 
 ---
 
@@ -35,7 +35,7 @@ Almost every app needs authentication, and doing it *wrong* is one of the most c
 
 ---
 
-## How a request flows through the system
+## How a request flows through the system : 
 
 ```mermaid
 graph TD
