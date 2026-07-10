@@ -1,4 +1,4 @@
-# Authentication API 🔐
+# Authentication API
 
 A secure, production-style backend service that handles **user signup, login, and login sessions** — the kind of system every app (Instagram, Amazon, Gmail...) needs behind the scenes to know *who you are* and keep your account safe.
 
