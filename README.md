@@ -1,8 +1,8 @@
-# Authentication API 🔐
+# Authentication API
 
 A secure, production-style backend service that handles **user signup, login, and login sessions** — the kind of system every app (Instagram, Amazon, Gmail...) needs behind the scenes to know *who you are* and keep your account safe.
 
-> 🎓 This is my **first internship project** — built to understand how real-world authentication systems work under the hood.
+>  This is my **first internship project** — built to understand how real-world authentication systems work under the hood.
 
 ---
 
@@ -35,7 +35,7 @@ Almost every app needs authentication, and doing it *wrong* is one of the most c
 
 ---
 
-## How a request flows through the system
+## How a request flows through the system : 
 
 ```mermaid
 graph TD
@@ -301,6 +301,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 CLIENT_URL=http://localhost:5173
 NODE_ENV=development
 PORT=3000
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
 ```
 
 > All of these variables are required — the app will refuse to start if any are missing (this is intentional, to avoid accidentally running with insecure defaults).
@@ -321,6 +322,9 @@ The API will be running at `http://localhost:3000`.
 - The Google OAuth redirect URL after login is hardcoded to `http://localhost:5173` — update this for production use.
 - No `.env.example` file is included yet — use the template above.
 - This is a **standalone auth service** — it's designed to be plugged into a frontend or another backend, not to be a complete app on its own.
+- /google/ sahi entry point hai, /callback nahi — reviewer ko batata hai kaise test karna hai
+Kyun error aata hai /callback directly open karne pe — missing scope/code params
+Login aur Register dono same endpoint use karenge frontend banne ke baad — Google OAuth naturally handle karta hai (naya user = auto-register, existing user = login), koi alag route ki zaroorat nahi
 
 ---
 
