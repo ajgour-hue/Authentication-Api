@@ -321,6 +321,9 @@ The API will be running at `http://localhost:3000`.
 - The Google OAuth redirect URL after login is hardcoded to `http://localhost:5173` — update this for production use.
 - No `.env.example` file is included yet — use the template above.
 - This is a **standalone auth service** — it's designed to be plugged into a frontend or another backend, not to be a complete app on its own.
+- /google/ sahi entry point hai, /callback nahi — reviewer ko batata hai kaise test karna hai
+Kyun error aata hai /callback directly open karne pe — missing scope/code params
+Login aur Register dono same endpoint use karenge frontend banne ke baad — Google OAuth naturally handle karta hai (naya user = auto-register, existing user = login), koi alag route ki zaroorat nahi
 
 ---
 
