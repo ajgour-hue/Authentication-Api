@@ -187,7 +187,12 @@ export const googleCallback = async (req, res) => {
         sameSite: "strict",
     });
 
-    res.redirect("http://localhost:5173");
+    // res.redirect("http://localhost:5173");
+     res.redirect(
+        config.NODE_ENV === "development"
+            ? "http://localhost:5173"
+            : config.CLIENT_URL
+    );
 };
 
 // Function to logout user
